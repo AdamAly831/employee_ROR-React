@@ -1,38 +1,6 @@
+
 var Employees = React.createClass({
-
-  render: function() {
-    employees = this.props.employees.map( function(employee) {
-      return (
-        <tr key={employee.id}>
-          <td>{employee.name}</td>
-          <td>{employee.email}</td>
-          <td>{employee.manager ? '&#10004;' : ''}</td>
-        </tr>
-      );
-    });
-    return (
-      <div>
-        <h1>Employees</h1>
-        <div id="employees">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Manager</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  }
-});
-
-getInitialState() {
+  getInitialState() {
     return {
       employees: this.props.employees,
       employee: {
@@ -44,8 +12,25 @@ getInitialState() {
     }
   },
 
+  handleNameChange(e) {
+    var newEmployee = this.state.employee
+    newEmployee.name = e.target.value
+    this.setState({employee: newEmployee});
+  },
 
-handleHireEmployee() {
+  handleEmailChange(e) {
+    var newEmployee = this.state.employee
+    newEmployee.email = e.target.value
+    this.setState({employee: newEmployee});
+  },
+
+  handleManagerChange(e) {
+    var newEmployee = this.state.employee
+    newEmployee.manager = e.target.value
+    this.setState({employee: newEmployee});
+  },
+
+  handleHireEmployee() {
     var that = this;
     $.ajax({
       method: 'POST',
@@ -72,21 +57,50 @@ handleHireEmployee() {
     });
   },
 
-
-handleNameChange(e) {
-    var newEmployee = this.state.employee;
-    newEmployee.name = e.target.value;
-    this.setState({employee: newEmployee});
+  handleFireEmployee(employee) {
+    var employeeList = this.state.employees.filter(function(item) {
+      return employee.id !== item.id;
+    });
+    this.setState({employees: employeeList});
   },
 
-  handleEmailChange(e) {
-    var newEmployee = this.state.employee;
-    newEmployee.email = e.target.value;
-    this.setState({employee: newEmployee});
-  },
-
-  handleManagerChange(e) {
-    var newEmployee = this.state.employee;
-    newEmployee.manager = e.target.value;
-    this.setState({employee: newEmployee});
-  },
+  render() {
+    var that = this;
+    employees = this.state.employees.map( function(employee) {
+      return (
+        <Employee employee={employee} key={employee.id} onFireEmployee={that.handleFireEmployee} />
+      );
+    });
+    return (
+      <div>
+        <h1>Employees</h1>
+        <div id="employees">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Manager</th>
+              </tr>
+            </thead>
+            <tbody>
+              {employees}
+              <tr>
+                <td>
+                  <input type="text" value={this.state.employee.name} onChange={this.handleNameChange} /><br />
+                  <span style={{color: 'red'}}>{this.state.errors.name}</span>
+                </td>
+                <td>
+                  <input value={this.state.employee.email} type="text" onChange={this.handleEmailChange} /><br />
+                  <span style={{color: 'red'}}>{this.state.errors.email}</span>
+                </td>
+                <td><input value={this.state.employee.manager} type="checkbox" onChange={this.handleManagerChange} /></td>
+                <td><button onClick={this.handleHireEmployee}>Hire</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+})
